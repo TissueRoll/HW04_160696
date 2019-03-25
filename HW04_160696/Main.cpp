@@ -161,9 +161,9 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(program);
-		float zoom = abs(sin(glfwGetTime()));
-		glUniform1f(nu, (zoom >= lim ? zoom : lim));
-		glUniform1f(nv, (zoom >= lim ? zoom : lim));
+		float zoom = lim*sin(glfwGetTime());
+		glUniform1f(nu, zoom+lim*2.f);
+		glUniform1f(nv, zoom+lim*2.f);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
