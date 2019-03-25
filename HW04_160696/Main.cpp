@@ -17,9 +17,9 @@ const unsigned int SCR_HEIGHT = 700;
 const float temp_scale = 0.5f;
 
 struct Vertex {
-	GLfloat x, y, z; // position
-	GLubyte r, g, b, a; // color
-	GLfloat u, v;
+	GLfloat x, y, z, // position
+			r, g, b, a, // color
+			u, v;
 };
 
 Vertex vertices[] = {
@@ -119,8 +119,9 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, r));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
 
 	GLuint tex0;
@@ -131,21 +132,20 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	int width, height, numChannels;
-	auto data = stbi_load("pepethink.jpg", &width, &height, &numChannels, 0);
+	int w, h, n;
+	auto *data = stbi_load("pepethink.jpg", &w, &h, &n, 0);
 	if (data) { // check if data contains something
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		// glGenerateMipmap generates mipmaps after loading a texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
 		std::cout << "Failed to load texture." << std::endl;
 	}
 	stbi_image_free(data);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex0);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, tex0);
 	glUniform1i(glGetUniformLocation(program, "tex0"), 0);
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
 
 	// render loop
 	// -----------
@@ -161,8 +161,6 @@ int main() {
 
 		glUseProgram(program);
 		glBindVertexArray(vao);
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
