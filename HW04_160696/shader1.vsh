@@ -4,12 +4,9 @@ layout(location = 0) in vec3 v_pos; // 0 is position
 layout(location = 1) in vec4 v_color; // 1 is color
 layout(location = 2) in vec2 tex_coords;
 
-out vec4 f_color;
-
-uniform float scaleFactor;
+out vec2 f_texCoords;
 
 void main() {
-	f_color = v_color;
-	//gl_Position = vec4(v_pos, 1.f);
-	gl_Position = vec4(v_pos.xyz * scaleFactor, 1.f);
+	f_texCoords = tex_coords;
+	gl_Position = v_pos;
 }

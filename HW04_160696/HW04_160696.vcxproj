@@ -132,9 +132,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Documents\OpenGL\Source\stb_image.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shader1.fsh" />
     <None Include="shader2.fsh" />
   </ItemGroup>
@@ -148,6 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="pepethink.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
