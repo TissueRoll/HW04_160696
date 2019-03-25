@@ -43,4 +43,9 @@
       <Filter>Source Files</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="pepethink.jpg">
+      <Filter>Source Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

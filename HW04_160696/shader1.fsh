@@ -1,14 +1,12 @@
 #version 330 core
 
-in vec4 f_color;
+in vec2 f_texCoords;
 
 out vec4 fragColor;
-uniform float red;
-uniform float green;
-uniform float blue;
-uniform float alpha;
+
+uniform Sampler2D tex0;
 
 void main(){
-	fragColor = vec4(red, green, blue, alpha);
+	fragColor = texture(tex0, f_texCoords);
 	//fragColor = f_color;
 }

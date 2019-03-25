@@ -5,6 +5,9 @@
 #include <string>
 #include <time.h>
 #include <stdlib.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+// is this working
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -17,35 +20,16 @@ const float temp_scale = 0.5f;
 struct Vertex {
 	GLfloat x, y, z; // position
 	GLubyte r, g, b, a; // color
+	GLfloat u, v;
 };
 
 Vertex vertices[] = {
 	//   x      y  z    r    g    b  a
-	// --- left wing ---
-	{-1.0f,  0.4f, 0, 255, 255, 255, 1},
-	{-1.0f, -1.0f, 0, 255, 255, 255, 1},
-	{-0.4f,  1.0f, 0, 255, 255, 255, 1},
-	{-0.4f, -0.4f, 0, 255, 255, 255, 1},
-	// --- left wing ---
-	// --- body ---
-	{-0.4f,  0.4f, 0, 255, 255, 255, 1},
-	{-0.4f, -0.4f, 0, 255, 255, 255, 1},
-	{ 0.4f,  0.4f, 0, 255, 255, 255, 1},
-	{ 0.4f, -0.4f, 0, 255, 255, 255, 1},
-	// --- body ---
-	// --- right wing ---
-	{ 0.4f,  1.0f, 0, 255, 255, 255, 1},
-	{ 0.4f, -0.4f, 0, 255, 255, 255, 1},
-	{ 1.0f,  0.4f, 0, 255, 255, 255, 1},
-	{ 1.0f, -1.0f, 0, 255, 255, 255, 1}
-	// --- right wing ---
+	{-0.5f,  0.5f, 0, 255, 255, 255, 1},
+	{-0.5f, -0.5f, 0, 255, 255, 255, 1},
+	{ 0.5f,  0.5f, 0, 255, 255, 255, 1},
+	{ 0.5f, -0.5f, 0, 255, 255, 255, 1}
 };
-
-void drawDecagon() {
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
-	glDrawArrays(GL_TRIANGLE_STRIP, 8, 4);
-}
 
 GLfloat p1_rand_r, p1_rand_g, p1_rand_b, p1_rand_a, p2_rand_r, p2_rand_g, p2_rand_b, p2_rand_a, scaling;
 bool space_pressed, k1_pressed, k2_pressed, k3_pressed, k4_pressed, kUP_pressed, traj;
@@ -95,12 +79,6 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// recalibrate the image
-	for (int i = 0; i < 12; i++) {
-		vertices[i].x *= temp_scale;
-		vertices[i].y *= temp_scale;
-	}
-
 	std::string out;
 	std::ifstream f;
 	const char* vertexShaderSource;
@@ -149,6 +127,7 @@ int main() {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	/*
 	std::string vsh2;
 	f.open("shader2.vsh");
 	if (f.is_open()) {
@@ -188,8 +167,35 @@ int main() {
 
 	glDeleteShader(vertexShader2);
 	glDeleteShader(fragmentShader2);
+	*/
 
 	// linking vertex attributes
+	GLuint tex0;
+	glGenTextures(1, &tex0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	int width, height, numChannels;
+	auto data = stbi_load("pepethink.jpg", &width, &height, &numChannels, 0);
+	if (data) { // check if data contains something
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		// glGenerateMipmap generates mipmaps after loading a texture
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture." << std::endl;
+	}
+	stbi_image_free(data);
+	glActiveTexture(GL_TEXTURE0);
+	// glBindTexture now binds the texture to the currently active texture unit
+	glBindTexture(GL_TEXTURE_2D, tex0);
+	glUniform1i(glGetUniformLocation(program, "tex0"), 0);
+	stbi_set_flip_vertically_on_load(true);
+
+
 	GLuint vao, vbo;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -200,7 +206,7 @@ int main() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, r));
-	
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
 
 	// get uniform locations
 	// program 1
@@ -210,6 +216,7 @@ int main() {
 	auto p1_blue = glGetUniformLocation(program, "blue");
 	auto p1_alpha = glGetUniformLocation(program, "alpha");
 
+	/*
 	// program 2
 	auto x_coord = glGetUniformLocation(program2, "x_coord");
 	auto y_coord = glGetUniformLocation(program2, "y_coord");
@@ -217,6 +224,7 @@ int main() {
 	auto p2_green = glGetUniformLocation(program2, "green");
 	auto p2_blue = glGetUniformLocation(program2, "blue");
 	auto p2_alpha = glGetUniformLocation(program2, "alpha");
+	*/
 
 	// render loop
 	// -----------
@@ -241,8 +249,9 @@ int main() {
 		glBindVertexArray(vao);
 		//glEnable(GL_BLEND);
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		drawDecagon();
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+		/*
 		glUseProgram(program2);
 		glUniform1f(p2_red, p2_rand_r);
 		glUniform1f(p2_green, p2_rand_g);
@@ -253,7 +262,8 @@ int main() {
 		//glBindVertexArray(vao);
 		//glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		drawDecagon();
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		*/
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
