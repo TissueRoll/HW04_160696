@@ -6,7 +6,10 @@ layout(location = 2) in vec2 tex_coords; // 2 is texture
 
 out vec2 f_texCoords;
 
+uniform float new_u;
+uniform float new_v;
+
 void main() {
-	f_texCoords = tex_coords;
-	gl_Position = v_pos;
+	f_texCoords = vec2(((tex_coords.x - 0.5f)*new_u) + 0.5f, ((tex_coords.y - 0.5f)*new_v) + 0.5f);
+	gl_Position = vec4(v_pos, 1.f);
 }

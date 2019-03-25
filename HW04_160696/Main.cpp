@@ -24,10 +24,10 @@ struct Vertex {
 
 Vertex vertices[] = {
 	//   x      y  z    r    g    b  a  u  v
-	{-0.5f,  0.5f, 0, 255, 255, 255, 1, 0, 1},
-	{-0.5f, -0.5f, 0, 255, 255, 255, 1, 0, 0},
-	{ 0.5f,  0.5f, 0, 255, 255, 255, 1, 1, 1},
-	{ 0.5f, -0.5f, 0, 255, 255, 255, 1, 1, 0}
+	{-0.5f,  0.5f, 0, 255, 255, 255, 1, -1, 2},
+	{-0.5f, -0.5f, 0, 255, 255, 255, 1, -1, -1},
+	{ 0.5f,  0.5f, 0, 255, 255, 255, 1, 2, 2},
+	{ 0.5f, -0.5f, 0, 255, 255, 255, 1, 2, -1}
 };
 
 int main() {
@@ -133,6 +133,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	int w, h, n;
+	stbi_set_flip_vertically_on_load(true);
 	auto *data = stbi_load("pepethink.jpg", &w, &h, &n, 0);
 	if (data) { // check if data contains something
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -142,11 +143,11 @@ int main() {
 		std::cout << "Failed to load texture." << std::endl;
 	}
 	stbi_image_free(data);
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, tex0);
 	glUniform1i(glGetUniformLocation(program, "tex0"), 0);
-	//stbi_set_flip_vertically_on_load(true);
 
+	auto nu = glGetUniformLocation(program, "new_u");
+	auto nv = glGetUniformLocation(program, "new_v");
+	float lim = 1.f / 3.f;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window)) {
@@ -160,6 +161,9 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(program);
+		float zoom = abs(sin(glfwGetTime()));
+		glUniform1f(nu, (zoom >= lim ? zoom : lim));
+		glUniform1f(nv, (zoom >= lim ? zoom : lim));
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
